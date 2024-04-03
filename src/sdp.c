@@ -409,7 +409,7 @@ int janus_sdp_process_remote(void *ice_handle, janus_sdp *remote_sdp, gboolean r
 				size_t total_length = UFRAG_USERNAME_LENGTH;
 				size_t desired_ufrag_length = total_length - (size_t)strlen(ruser) - 1;
 
-				if (ufrag && ((size_t)strlen(ufrag) != desired_ufrag_length)) {
+				if (ufrag && desired_ufrag_length > 0 && ((size_t)strlen(ufrag) != desired_ufrag_length)) {
 					gchar buf[desired_ufrag_length];
 					custom_rng_generate_bytes_print(sizeof(buf), buf);
 					JANUS_LOG(LOG_INFO, "[%"SCNu64"] ice len_ufrag: %zu len_required: %zu new_user: %s\n", handle->handle_id, strlen(ufrag), desired_ufrag_length, buf);
