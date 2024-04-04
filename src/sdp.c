@@ -405,7 +405,9 @@ int janus_sdp_process_remote(void *ice_handle, janus_sdp *remote_sdp, gboolean r
 				// Implement custom local ufrag generation
 				gchar *ufrag = NULL;
 				gchar *password = NULL;
-				nice_agent_get_local_credentials(handle->agent, pc->stream_id, &ufrag, &password);
+				if (!nice_agent_get_local_credentials(handle->agent, pc->stream_id, &ufrag, &password)) {
+					JANUS_LOG(LOG_ERR, "Failed to get local credentials\n"); // This should never happen, if condition will handle it
+				}
 				
 				size_t total_length = UFRAG_USERNAME_LENGTH;
 				size_t desired_ufrag_length = total_length - (size_t)strlen(ruser) - 1;
