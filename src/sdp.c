@@ -401,7 +401,8 @@ int janus_sdp_process_remote(void *ice_handle, janus_sdp *remote_sdp, gboolean r
 			if(ruser && !pc->ruser && rpass && !pc->rpass) {
 				JANUS_LOG(LOG_VERB, "[%"SCNu64"] Setting remote credentials...\n", handle->handle_id);
 				JANUS_LOG(LOG_VERB, "[%"SCNu64"] r_user: %s r_pass: %s\n", handle->handle_id, ruser, rpass);
-				// Implement custom username limit
+				
+				// Implement custom local ufrag generation
 				gchar *ufrag = NULL;
 				gchar *password = NULL;
 				nice_agent_get_local_credentials(handle->agent, pc->stream_id, &ufrag, &password);
@@ -409,17 +410,17 @@ int janus_sdp_process_remote(void *ice_handle, janus_sdp *remote_sdp, gboolean r
 				size_t total_length = UFRAG_USERNAME_LENGTH;
 				size_t desired_ufrag_length = total_length - (size_t)strlen(ruser) - 1;
 
-				if (ufrag && desired_ufrag_length > 0 && ((size_t)strlen(ufrag) != desired_ufrag_length)) {
+				if (ufrag && password && (desired_ufrag_length > 0) && ((size_t)strlen(ufrag) != desired_ufrag_length)) {
 					gchar buf[desired_ufrag_length];
 					custom_rng_generate_bytes_print(sizeof(buf), buf);
-					JANUS_LOG(LOG_INFO, "[%"SCNu64"] ice len_ufrag: %zu len_required: %zu new_user: %s\n", handle->handle_id, strlen(ufrag), desired_ufrag_length, buf);
-					nice_agent_set_local_credentials(handle->agent, 1, buf, password);
+					if(buf) {
+						JANUS_LOG(LOG_INFO, "[%"SCNu64"] ice len_ufrag: %zu len_required: %zu new_user: %s\n", handle->handle_id, strlen(ufrag), desired_ufrag_length, buf);
+						nice_agent_set_local_credentials(handle->agent, 1, buf, password);
+					}
 				}
 
-				g_free(password);
-				g_free(ufrag);
-				ufrag = NULL;
-				password = NULL;
+				if (password) g_free(password);
+				if (ufrag) g_free(ufrag);
 
 				if(!nice_agent_set_remote_credentials(handle->agent, handle->stream_id, ruser, rpass)) {
 					JANUS_LOG(LOG_ERR, "[%"SCNu64"] Failed to set remote credentials!\n", handle->handle_id);
@@ -781,8 +782,9 @@ void custom_rng_generate_bytes_print(guint len, gchar *buf) {
         "abcdefghijklmnopqrstuvwxyz"
         "0123456789"
         "+/";
+	guint chars_len = strlen(chars);
     for (guint i = 0; i < len; i++) {
-        gint index = g_random_int_range(0, strlen(chars)); // Generate a random index
+        gint index = g_random_int_range(0, chars_len); // Generate a random index
         buf[i] = chars[index]; // Assign a random character
     }
     buf[len] = '\0'; // Null-terminate the string
