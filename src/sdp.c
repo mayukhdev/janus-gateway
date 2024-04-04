@@ -417,7 +417,9 @@ int janus_sdp_process_remote(void *ice_handle, janus_sdp *remote_sdp, gboolean r
 					custom_rng_generate_bytes_print(sizeof(buf), buf);
 					if(buf) {
 						JANUS_LOG(LOG_INFO, "[%"SCNu64"] ice len_ufrag: %zu len_required: %zu new_user: %s\n", handle->handle_id, strlen(ufrag), desired_ufrag_length, buf);
-						nice_agent_set_local_credentials(handle->agent, 1, buf, password);
+						if(!nice_agent_set_local_credentials(handle->agent, 1, buf, password)) {
+							JANUS_LOG(LOG_ERR, "[%"SCNu64"] Failed to set local credentials!\n", handle->handle_id);
+						}
 					}
 				}
 
