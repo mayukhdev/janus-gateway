@@ -3603,6 +3603,10 @@ int janus_ice_setup_local(janus_ice_handle *handle, gboolean offer, gboolean tri
 
 	/* Note: NICE_COMPATIBILITY_RFC5245 is only available in more recent versions of libnice */
 	handle->controlling = janus_ice_lite_enabled ? FALSE : !offer;
+	// Force controlling
+	if(JANUS_FORCE_CONTROLLING) {
+		handle->controlling = TRUE;
+	}
 	JANUS_LOG(LOG_INFO, "[%"SCNu64"] Creating ICE agent (ICE %s mode, %s)\n", handle->handle_id,
 		janus_ice_lite_enabled ? "Lite" : "Full", handle->controlling ? "controlling" : "controlled");
 	handle->agent = g_object_new(NICE_TYPE_AGENT,

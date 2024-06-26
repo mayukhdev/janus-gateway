@@ -282,6 +282,7 @@ typedef struct janus_ice_trickle janus_ice_trickle;
 #define JANUS_ICE_HANDLE_WEBRTC_NEW_DATACHAN_SDP	(1 << 20)
 #define JANUS_ICE_HANDLE_WEBRTC_E2EE				(1 << 21)
 
+#define JANUS_FORCE_CONTROLLING (1 << 0)
 
 /*! \brief Janus media types */
 typedef enum janus_media_type {
